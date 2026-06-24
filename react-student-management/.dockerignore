@@ -1,1 +1,13 @@
 node_modules
+build
+.git
+.gitignore
+Dockerfile
+docker-file-bk.txt
+.env
+.env.*
+*.md
+.vscode
+.idea
+coverage
+yarn.lock
