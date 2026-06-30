@@ -4,7 +4,7 @@ pipeline {
     environment {
         REGISTRY_CREDS = 'docker-hub-credentials' // ID Credentials Jenkins của Docker Hub
         IMAGE_NAME = 'student-app-web'
-        DOCKER_USER = 'hoangnh' // Thay thế bằng username Docker Hub của bạn
+        DOCKER_USER = 'hoang4325' // Thay thế bằng username Docker Hub của bạn
         TAG = "${env.BUILD_NUMBER}"
     }
 
