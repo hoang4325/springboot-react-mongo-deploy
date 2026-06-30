@@ -36,8 +36,9 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                // Deploy local bằng Docker Compose restart web container
-                sh "docker compose up -d web"
+                // Pull ảnh mới nhất và deploy chỉ container web
+                sh "docker compose pull web"
+                sh "docker compose up -d --no-deps --force-recreate web"
             }
         }
     }

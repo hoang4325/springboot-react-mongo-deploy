@@ -44,8 +44,9 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                // Deploy local bằng Docker Compose restart api container
-                sh "docker compose up -d api"
+                // Pull ảnh mới nhất và deploy chỉ container api, tránh tranh chấp/tạo lại database container nếu không cần thiết
+                sh "docker compose pull api"
+                sh "docker compose up -d --no-deps --force-recreate api"
             }
         }
     }
