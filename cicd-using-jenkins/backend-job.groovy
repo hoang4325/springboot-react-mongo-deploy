@@ -45,8 +45,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 // Pull ảnh mới nhất và deploy chỉ container api, tránh tranh chấp/tạo lại database container nếu không cần thiết
-                sh "docker compose pull api"
-                sh "docker compose up -d --no-deps --force-recreate api"
+                sh "docker compose -p fullstack-deploy pull api"
+                sh "docker compose -p fullstack-deploy up -d --no-deps --force-recreate api"
             }
         }
     }

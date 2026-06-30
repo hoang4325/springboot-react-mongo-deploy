@@ -37,8 +37,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 // Pull ảnh mới nhất và deploy chỉ container web
-                sh "docker compose pull web"
-                sh "docker compose up -d --no-deps --force-recreate web"
+                sh "docker compose -p fullstack-deploy pull web"
+                sh "docker compose -p fullstack-deploy up -d --no-deps --force-recreate web"
             }
         }
     }
