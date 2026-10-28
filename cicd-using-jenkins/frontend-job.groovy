@@ -1,13 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        REGISTRY_CREDS = 'docker-hub-credentials' // ID Credentials Jenkins của Docker Hub
-        IMAGE_NAME = 'student-app-web'
-        DOCKER_USER = 'hoang4325' // Thay thế bằng username Docker Hub của bạn
-        TAG = "${env.BUILD_NUMBER}"
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -16,36 +9,45 @@ pipeline {
             }
         }
 
+        stage('GitOps tooling check') {
+            steps {
+                sh 'command -v git && command -v python3 && command -v gh'
+            }
+        }
+
         stage('Docker Build') {
             steps {
                 dir('react-student-management') {
-                    sh "docker build -t ${DOCKER_USER}/${IMAGE_NAME}:${TAG} -t ${DOCKER_USER}/${IMAGE_NAME}:latest ."
+                    sh 'docker build -t hoang4325/student-app-web:$BUILD_NUMBER -t hoang4325/student-app-web:latest .'
                 }
             }
         }
 
         stage('Docker Push') {
             steps {
-                withCredentials([usernamePassword(credentialsId: "${REGISTRY_CREDS}", passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER_ENV')]) {
-                    sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER_ENV --password-stdin"
-                    sh "docker push ${DOCKER_USER}/${IMAGE_NAME}:${TAG}"
-                    sh "docker push ${DOCKER_USER}/${IMAGE_NAME}:latest"
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER_ENV')]) {
+                    sh '''
+                        set +x
+                        printf '%s' "$DOCKER_PASS" | docker login -u "$DOCKER_USER_ENV" --password-stdin
+                    '''
+                    sh 'docker push hoang4325/student-app-web:$BUILD_NUMBER'
+                    sh 'docker push hoang4325/student-app-web:latest'
                 }
             }
         }
 
-        stage('Deploy') {
+        stage('Create GitOps PR') {
             steps {
-                // Pull ảnh mới nhất và deploy chỉ container web
-                sh "docker compose -p fullstack-deploy pull web"
-                sh "docker compose -p fullstack-deploy up -d --no-deps --force-recreate web"
+                withCredentials([string(credentialsId: 'github-gitops-token', variable: 'GH_TOKEN')]) {
+                    sh 'bash cicd-using-jenkins/gitops-create-pr.sh frontend "$BUILD_NUMBER"'
+                }
             }
         }
     }
 
     post {
         always {
-            sh "docker logout"
+            sh 'docker logout || true'
         }
     }
 }
